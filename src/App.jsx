@@ -19,21 +19,40 @@ function App() {
   }, [board]);
 
   const handleClick = (rowId, colId) => {
-    setBoard((prev) =>
-      prev.map((item, index) => {
-        if (colId !== index) return item;
-        else
-          return item.map((el, i) => {
-            console.log(el);
-            if (el !== null) return el;
-            else if (i === item.length - 1)
-              return isPlayerOne ? PLAYER1_ID : PLAYER2_ID;
-            else if (item[i + 1] !== null)
-              return isPlayerOne ? PLAYER1_ID : PLAYER2_ID;
-            else return el;
-          });
-      })
-    );
+    if (board[colId][0] !== null) return;
+
+    let currentPlayer = null;
+    let score = 0;
+
+    const updatedBoard = board.map((item, index) => {
+      if (colId !== index) return item;
+      else
+        return item.map((el, i) => {
+          if (el !== null) return el;
+          else if (i === item.length - 1)
+            return isPlayerOne ? PLAYER1_ID : PLAYER2_ID;
+          else if (item[i + 1] !== null)
+            return isPlayerOne ? PLAYER1_ID : PLAYER2_ID;
+          else return el;
+        });
+    });
+
+    setBoard(updatedBoard);
+
+    updatedBoard[colId].forEach((el, i) => {
+      if (score === 4) return;
+      if (el === null) return;
+
+      if (currentPlayer === null) {
+        currentPlayer = el;
+        score = 1;
+      } else if (el === currentPlayer) {
+        score++;
+      } else {
+        currentPlayer = el;
+        score = 1;
+      }
+    });
   };
 
   return (
