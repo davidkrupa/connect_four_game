@@ -13,16 +13,15 @@ function App() {
       .map(() => Array(ROWS_NUMBER).fill(null))
   );
   const [isPlayerOne, setIsPlayerOne] = useState(true);
+  const [isWin, setIsWin] = useState(false);
 
   useEffect(() => {
     setIsPlayerOne((prev) => !prev);
   }, [board]);
 
   const handleClick = (rowId, colId) => {
+    if (isWin) return;
     if (board[colId][0] !== null) return;
-
-    let currentPlayer = null;
-    let score = 0;
 
     const updatedBoard = board.map((item, index) => {
       if (colId !== index) return item;
@@ -37,10 +36,23 @@ function App() {
         });
     });
 
+    const newElemIndex = updatedBoard[colId].findIndex((el) => el !== null);
+
     setBoard(updatedBoard);
 
+    const winnerColumn = checkColumnForWinner(updatedBoard, colId);
+    const winnerRow = checkRowForWinner(updatedBoard, newElemIndex);
+
+    winnerColumn && setIsWin(true);
+    winnerRow && setIsWin(true);
+  };
+
+  const checkColumnForWinner = (updatedBoard, colId) => {
+    let currentPlayer = null;
+    let score = 0;
+
     updatedBoard[colId].forEach((el, i) => {
-      if (score === 4) return;
+      if (score >= 4) return;
       if (el === null) return;
 
       if (currentPlayer === null) {
@@ -53,6 +65,33 @@ function App() {
         score = 1;
       }
     });
+
+    return score >= 4 ? currentPlayer : null;
+  };
+
+  const checkRowForWinner = (updatedBoard, rowIndex) => {
+    let currentPlayer = null;
+    let score = 0;
+
+    updatedBoard.forEach((column) => {
+      const playerId = column[rowIndex];
+      if (score >= 4) return;
+
+      if (playerId === null) {
+        score = 0;
+        currentPlayer = null;
+      } else if (currentPlayer === null) {
+        currentPlayer = playerId;
+        score = 1;
+      } else if (currentPlayer === playerId) {
+        score++;
+      } else {
+        currentPlayer = playerId;
+        score = 1;
+      }
+    });
+
+    return score >= 4 ? currentPlayer : null;
   };
 
   return (
