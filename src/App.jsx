@@ -19,7 +19,7 @@ function App() {
     setIsPlayerOne((prev) => !prev);
   }, [board]);
 
-  const handleClick = (rowId, colId) => {
+  const handleClick = (colId) => {
     if (isWin) return;
     if (board[colId][0] !== null) return;
 
@@ -38,20 +38,28 @@ function App() {
 
     const newElemIndex = updatedBoard[colId].findIndex((el) => el !== null);
 
+    // console.log(newElemIndex);
+
     setBoard(updatedBoard);
 
     const winnerColumn = checkColumnForWinner(updatedBoard, colId);
     const winnerRow = checkRowForWinner(updatedBoard, newElemIndex);
+    const diagonalWinnerFirst = checkDiagonalFirstWinner(
+      updatedBoard,
+      colId,
+      newElemIndex
+    );
 
     winnerColumn && setIsWin(true);
     winnerRow && setIsWin(true);
+    diagonalWinnerFirst && setIsWin(true);
   };
 
-  const checkColumnForWinner = (updatedBoard, colId) => {
+  const checkColumnForWinner = (updatedBoard, colIndex) => {
     let currentPlayer = null;
     let score = 0;
 
-    updatedBoard[colId].forEach((el, i) => {
+    updatedBoard[colIndex].forEach((el, i) => {
       if (score >= 4) return;
       if (el === null) return;
 
@@ -88,6 +96,39 @@ function App() {
       } else {
         currentPlayer = playerId;
         score = 1;
+      }
+    });
+
+    return score >= 4 ? currentPlayer : null;
+  };
+
+  const checkDiagonalFirstWinner = (updatedBoard, colIndex, rowIndex) => {
+    const diagonalShift = colIndex - rowIndex;
+    const startingColIndex = diagonalShift > 0 ? diagonalShift : 0;
+    const startingRowIndex = rowIndex - colIndex > 0 ? diagonalShift : 0;
+
+    let score = 0;
+    let currentPlayer = null;
+
+    updatedBoard.forEach((column, index) => {
+      if (score >= 4) return;
+      if (startingColIndex > index) return;
+      if (diagonalShift < 0 && index - diagonalShift > column.length - 1)
+        return; // reach border
+
+      if (startingColIndex === index) {
+        currentPlayer = column[index - diagonalShift];
+        score = currentPlayer !== null ? 1 : 0;
+      } else if (startingColIndex < index) {
+        if (
+          currentPlayer !== null &&
+          column[index - diagonalShift] === currentPlayer
+        ) {
+          score++;
+        } else {
+          currentPlayer = column[index - diagonalShift];
+          score = currentPlayer !== null ? 1 : 0;
+        }
       }
     });
 

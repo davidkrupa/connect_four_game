@@ -13,7 +13,7 @@ const Column = ({ elements, handleClick, columnIndex }) => {
         <div
           className="tile"
           key={index}
-          onClick={() => handleClick(index, columnIndex)}
+          onClick={() => handleClick(columnIndex)}
         >
           {item !== null && (
             <div className={`player ${playerStyle[item]}`}></div>
