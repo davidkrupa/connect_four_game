@@ -38,8 +38,6 @@ function App() {
 
     const newElemIndex = updatedBoard[colId].findIndex((el) => el !== null);
 
-    // console.log(newElemIndex);
-
     setBoard(updatedBoard);
 
     const winnerColumn = checkColumnForWinner(updatedBoard, colId);
@@ -49,10 +47,16 @@ function App() {
       colId,
       newElemIndex
     );
+    const diagonalWinnerSecond = checkDiagonalSecondWinner(
+      updatedBoard,
+      colId,
+      newElemIndex
+    );
 
     winnerColumn && setIsWin(true);
     winnerRow && setIsWin(true);
     diagonalWinnerFirst && setIsWin(true);
+    diagonalWinnerSecond && setIsWin(true);
   };
 
   const checkColumnForWinner = (updatedBoard, colIndex) => {
@@ -127,6 +131,35 @@ function App() {
           score++;
         } else {
           currentPlayer = column[index - diagonalShift];
+          score = currentPlayer !== null ? 1 : 0;
+        }
+      }
+    });
+
+    return score >= 4 ? currentPlayer : null;
+  };
+
+  const checkDiagonalSecondWinner = (updatedBoard, colIndex, rowIndex) => {
+    const shift = colIndex + rowIndex;
+    const startingColIndex = colIndex > shift ? colIndex - shift : 0;
+    const currentRowIndex = shift - colIndex;
+
+    let score = 0;
+    let currentPlayer = null;
+
+    updatedBoard.forEach((column, index) => {
+      if (score >= 4) return;
+      if (startingColIndex > index) return;
+      if (startingColIndex + shift > updatedBoard.length) return; // reach border
+
+      if (startingColIndex === index) {
+        currentPlayer = column[shift - index];
+        score = currentPlayer !== null ? 1 : 0;
+      } else if (startingColIndex < index) {
+        if (currentPlayer !== null && column[shift - index] === currentPlayer) {
+          score++;
+        } else {
+          currentPlayer = column[shift - index];
           score = currentPlayer !== null ? 1 : 0;
         }
       }
