@@ -14,8 +14,15 @@ function App() {
   );
   const [isPlayerOne, setIsPlayerOne] = useState(true);
   const [isWin, setIsWin] = useState(false);
+  const [isEndWitoutWinner, setIsEndWitoutWinner] = useState(false);
 
   useEffect(() => {
+    if (isWin) return;
+    if (board.every((column) => column.every((el) => el === null))) return;
+    if (board.every((column) => column.every((el) => el !== null)) && !isWin) {
+      setIsEndWitoutWinner(true);
+      return;
+    }
     setIsPlayerOne((prev) => !prev);
   }, [board]);
 
@@ -53,10 +60,11 @@ function App() {
       newElemIndex
     );
 
-    winnerColumn && setIsWin(true);
-    winnerRow && setIsWin(true);
-    diagonalWinnerFirst && setIsWin(true);
-    diagonalWinnerSecond && setIsWin(true);
+    (winnerColumn ||
+      winnerRow ||
+      diagonalWinnerFirst ||
+      diagonalWinnerSecond) &&
+      setIsWin(true);
   };
 
   const checkColumnForWinner = (updatedBoard, colIndex) => {
@@ -168,8 +176,16 @@ function App() {
     return score >= 4 ? currentPlayer : null;
   };
 
+  const handleRestart = () => {
+    setBoard((column) => column.map((row) => row.map(() => null)));
+    setIsPlayerOne(true);
+    setIsWin(false);
+    setIsEndWitoutWinner(false);
+  };
+
   return (
     <>
+      {isWin && <h1>Player {isPlayerOne ? "1" : "2"} Wins</h1>}
       <div className="board">
         {board.map((item, index) => (
           <Column
@@ -180,6 +196,15 @@ function App() {
           />
         ))}
       </div>
+      {(isWin || isEndWitoutWinner) && (
+        <button
+          onClick={() => {
+            handleRestart();
+          }}
+        >
+          Restart
+        </button>
+      )}
     </>
   );
 }
